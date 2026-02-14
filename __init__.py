@@ -117,9 +117,13 @@ def update_overlay():
     from .config import ConfigManager
     config = ConfigManager.get()
     
+    # Calculate bias and prepare breakdown
+    counts_dict = {"new": new_c, "learn": learn_c, "review": review_c}
+    bias = avg_time / historical_weighted if historical_weighted > 0 else 1.0
+    
     # Generate HTML & JS
-    html = ProgressWidget.get_bar_html(state.history, total_remaining, avg_time, state.start_time, config, deck_averages)
-    js_timer = ProgressWidget.get_timer_js(state.start_time, avg_time, total_remaining)
+    html = ProgressWidget.get_bar_html(state.history, total_remaining, avg_time, state.start_time, config, deck_averages, counts_dict, bias)
+    js_timer = ProgressWidget.get_timer_js(state.start_time, avg_time, total_remaining, counts_dict)
     
     # Inject via JS
     js = f"""

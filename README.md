@@ -10,5 +10,6 @@ Basically this [add-on](https://ankiweb.net/shared/info/1508357010), in short:
 - Colors (can be configured) for correct/incorrect cards. These colors are more
   transparent the longer you take to recall cards. The blocks representing the cards
   are also stretched according to the time taken.
+- Breakdown of estimate for different types of pending cards.
 - Configure options by first entering a study session. Then goto
-  `Tools > Anki Progress Bar options` and change them to your liking.
+  `Tools > Anki Progress Bar options` and adjust them to your liking.

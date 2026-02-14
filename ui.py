@@ -2,7 +2,7 @@ import time
 
 class ProgressWidget:
     @staticmethod
-    def get_bar_html(history, remaining_count, avg_time, start_time, config, deck_averages=None):
+    def get_bar_html(history, remaining_count, avg_time, start_time, config, deck_averages=None, counts=None, bias=1.0):
         
         position = config.get("position", "top")
         color_mode = config.get("color_mode", "dynamic")
@@ -28,7 +28,7 @@ class ProgressWidget:
                 display: flex !important;
                 width: 100% !important;
                 height: 20px !important;
-                background-color: {config.get("bg_color", "#f0f0f0")} !important;
+                background-color: transparent !important;
                 position: fixed !important;
                 {position}: 0 !important;
                 left: 0 !important;
@@ -50,6 +50,9 @@ class ProgressWidget:
             .block.ghost {{ 
                 background-color: transparent !important; 
             }}
+            .block.ghost-new {{ background-color: {config.get("ghost_new_color", "#0066FF")} !important; opacity: 0.15 !important; }}
+            .block.ghost-learn {{ background-color: {config.get("ghost_learn_color", "#FF0000")} !important; opacity: 0.15 !important; }}
+            .block.ghost-review {{ background-color: {config.get("ghost_review_color", "#009900")} !important; opacity: 0.15 !important; }}
             .overlay-text {{
                 position: absolute !important;
                 top: 0 !important;
@@ -92,8 +95,16 @@ class ProgressWidget:
             blocks_html += f"<div class='block {cls}' style='flex-grow: {flex}; opacity: {opacity};'></div>"
 
         if remaining_count > 0:
-            total_ghost_flex = remaining_count * avg_time
-            blocks_html += f"<div class='block ghost' style='flex-grow: {total_ghost_flex};'></div>"
+            if counts:
+                # Individual ghost blocks for each type
+                for t, count in counts.items():
+                    if count > 0:
+                        avg_t = deck_averages.get(t, avg_time) if deck_averages else avg_time
+                        flex = count * avg_t * bias
+                        blocks_html += f"<div class='block ghost-{t}' style='flex-grow: {flex};' title='{t.capitalize()}: {count}'></div>"
+            else:
+                total_ghost_flex = remaining_count * avg_time
+                blocks_html += f"<div class='block ghost' style='flex-grow: {total_ghost_flex};'></div>"
 
         initial_labels = f"Time: {format_time(elapsed_time)} | Rem: {format_time(est_remaining_time)} | Tot: {format_time(total_est_time)}"
 
@@ -107,7 +118,7 @@ class ProgressWidget:
         return html
 
     @staticmethod
-    def get_timer_js(start_time, avg_time, remaining_count):
+    def get_timer_js(start_time, avg_time, remaining_count, counts=None):
         return f"""
             (function() {{
                 const startTimestamp = {start_time};

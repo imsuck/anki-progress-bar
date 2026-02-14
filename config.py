@@ -26,6 +26,9 @@ class ConfigManager:
                     "bg_color": "#f0f0f0",
                     "max_time_per_card": 60,
                     "smoothing_alpha": 0.2,
+                    "ghost_new_color": "#0066FF",
+                    "ghost_learn_color": "#FF0000",
+                    "ghost_review_color": "#009900"
                 }
         return cls._config
 
@@ -106,6 +109,15 @@ class ConfigDialog(QDialog):
 
         self.incorrect_color_btn = ColorButton(self.config.get("incorrect_color", "#F44336"))
         form.addRow("Incorrect Color:", self.incorrect_color_btn)
+
+        self.ghost_new_color_btn = ColorButton(self.config.get("ghost_new_color", "#0066FF"))
+        form.addRow("New Color:", self.ghost_new_color_btn)
+
+        self.ghost_learn_color_btn = ColorButton(self.config.get("ghost_learn_color", "#FF0000"))
+        form.addRow("Learn Color:", self.ghost_learn_color_btn)
+
+        self.ghost_review_color_btn = ColorButton(self.config.get("ghost_review_color", "#009900"))
+        form.addRow("Review Color:", self.ghost_review_color_btn)
         
         # Max Time
         self.max_time_spin = QSpinBox()
@@ -152,6 +164,9 @@ class ConfigDialog(QDialog):
         self.config["incorrect_color"] = self.incorrect_color_btn.color()
         self.config["max_time_per_card"] = self.max_time_spin.value()
         self.config["smoothing_alpha"] = self.alpha_spin.value()
+        self.config["ghost_new_color"] = self.ghost_new_color_btn.color()
+        self.config["ghost_learn_color"] = self.ghost_learn_color_btn.color()
+        self.config["ghost_review_color"] = self.ghost_review_color_btn.color()
         
         ConfigManager.save(self.config)
         super().accept()
