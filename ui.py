@@ -1,12 +1,22 @@
 import time
 
+
 class ProgressWidget:
     @staticmethod
-    def get_bar_html(history, remaining_count, avg_time, start_time, config, deck_averages=None, counts=None, bias=1.0):
-        
+    def get_bar_html(
+        history,
+        remaining_count,
+        avg_time,
+        start_time,
+        config,
+        deck_averages=None,
+        counts=None,
+        bias=1.0,
+    ):
+
         position = config.get("position", "top")
         color_mode = config.get("color_mode", "dynamic")
-        
+
         # Mapping for type-aware opacity
         type_mapping = {0: "new", 1: "learn", 2: "review", 3: "learn"}
 
@@ -14,7 +24,7 @@ class ProgressWidget:
         elapsed_time = time.time() - start_time
         est_remaining_time = remaining_count * avg_time
         total_est_time = elapsed_time + est_remaining_time
-        
+
         def format_time(seconds):
             h, rem = divmod(int(seconds), 3600)
             m, s = divmod(rem, 60)
@@ -37,7 +47,7 @@ class ProgressWidget:
                 font-size: 12px !important;
                 line-height: 20px !important;
                 color: {config.get("text_color", "#333")} !important;
-                border-{ "bottom" if position == "top" else "top" }: 1px solid rgba(0,0,0,0.1) !important;
+                border-{"bottom" if position == "top" else "top"}: 1px solid rgba(0,0,0,0.1) !important;
                 box-sizing: border-box !important;
             }}
             .block {{
@@ -67,31 +77,31 @@ class ProgressWidget:
         """
 
         blocks_html = ""
-        
+
         # Render History Blocks
         for item in history:
             # Determine which average to use for opacity
-            target_avg = avg_time # Fallback to blended session/hist average
-            if deck_averages and 'type' in item:
-                t_str = type_mapping.get(item['type'], "review")
+            target_avg = avg_time  # Fallback to blended session/hist average
+            if deck_averages and "type" in item:
+                t_str = type_mapping.get(item["type"], "review")
                 target_avg = deck_averages.get(t_str, avg_time)
 
             # Opacity Logic
             if color_mode == "simple":
                 opacity = 1.0
             else:
-                ratio = item['time'] / target_avg
+                ratio = item["time"] / target_avg
                 if ratio <= 0.5:
                     opacity = 1.0
                 elif ratio >= 1.5:
                     opacity = 0.3
                 else:
                     opacity = 1.0 + (-0.7 * (ratio - 0.5))
-                
+
                 opacity = max(0.3, min(1.0, opacity))
-            
-            cls = item['result']
-            flex = item['time']
+
+            cls = item["result"]
+            flex = item["time"]
             blocks_html += f"<div class='block {cls}' style='flex-grow: {flex}; opacity: {opacity};'></div>"
 
         if remaining_count > 0:
@@ -99,7 +109,11 @@ class ProgressWidget:
                 # Individual ghost blocks for each type
                 for t, count in counts.items():
                     if count > 0:
-                        avg_t = deck_averages.get(t, avg_time) if deck_averages else avg_time
+                        avg_t = (
+                            deck_averages.get(t, avg_time)
+                            if deck_averages
+                            else avg_time
+                        )
                         flex = count * avg_t * bias
                         blocks_html += f"<div class='block ghost-{t}' style='flex-grow: {flex};' title='{t.capitalize()}: {count}'></div>"
             else:

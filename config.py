@@ -4,6 +4,7 @@ from aqt.utils import showInfo
 import json
 import os
 
+
 # Global Config Manager
 class ConfigManager:
     _config = None
@@ -13,12 +14,12 @@ class ConfigManager:
     def load(cls):
         if cls._config is None:
             try:
-                with open(cls._config_file, 'r') as f:
+                with open(cls._config_file, "r") as f:
                     cls._config = json.load(f)
             except:
                 cls._config = {
-                    "position": "top", 
-                    "color_mode": "dynamic", 
+                    "position": "top",
+                    "color_mode": "dynamic",
                     "history_window": 20,
                     "text_color": "#333333",
                     "correct_color": "#4CAF50",
@@ -28,7 +29,7 @@ class ConfigManager:
                     "smoothing_alpha": 0.2,
                     "ghost_new_color": "#0066FF",
                     "ghost_learn_color": "#FF0000",
-                    "ghost_review_color": "#009900"
+                    "ghost_review_color": "#009900",
                 }
         return cls._config
 
@@ -41,7 +42,7 @@ class ConfigManager:
     @classmethod
     def save(cls, new_config):
         cls._config = new_config
-        with open(cls._config_file, 'w') as f:
+        with open(cls._config_file, "w") as f:
             json.dump(cls._config, f)
         # Notify listeners
         if hasattr(cls, "_callback") and cls._callback:
@@ -51,8 +52,10 @@ class ConfigManager:
     def set_callback(cls, callback):
         cls._callback = callback
 
+
 # Initialize on module load
 ConfigManager.load()
+
 
 class ColorButton(QPushButton):
     def __init__(self, color, parent=None):
@@ -63,15 +66,20 @@ class ColorButton(QPushButton):
 
     def set_color(self, color):
         self._color = color
-        self.setStyleSheet(f"#ColorBtn {{ background-color: {color}; border: 1px solid #999; min-width: 60px; }}")
+        self.setStyleSheet(
+            f"#ColorBtn {{ background-color: {color}; border: 1px solid #999; min-width: 60px; }}"
+        )
 
     def color(self):
         return self._color
 
     def _choose_color(self):
-        color = QColorDialog.getColor(QColor(self._color), self.parentWidget(), "Select Color")
+        color = QColorDialog.getColor(
+            QColor(self._color), self.parentWidget(), "Select Color"
+        )
         if color.isValid():
             self.set_color(color.name())
+
 
 class ConfigDialog(QDialog):
     def __init__(self, parent=None):
@@ -96,29 +104,39 @@ class ConfigDialog(QDialog):
         self.color_combo.addItems(["dynamic", "simple"])
         self.color_combo.setCurrentText(self.config.get("color_mode", "dynamic"))
         form.addRow("Color Mode:", self.color_combo)
-        
+
         # Colors
         self.text_color_btn = ColorButton(self.config.get("text_color", "#333333"))
         form.addRow("Text Color:", self.text_color_btn)
-        
+
         self.bg_color_btn = ColorButton(self.config.get("bg_color", "#f0f0f0"))
         form.addRow("Background Color:", self.bg_color_btn)
 
-        self.correct_color_btn = ColorButton(self.config.get("correct_color", "#4CAF50"))
+        self.correct_color_btn = ColorButton(
+            self.config.get("correct_color", "#4CAF50")
+        )
         form.addRow("Correct Color:", self.correct_color_btn)
 
-        self.incorrect_color_btn = ColorButton(self.config.get("incorrect_color", "#F44336"))
+        self.incorrect_color_btn = ColorButton(
+            self.config.get("incorrect_color", "#F44336")
+        )
         form.addRow("Incorrect Color:", self.incorrect_color_btn)
 
-        self.ghost_new_color_btn = ColorButton(self.config.get("ghost_new_color", "#0066FF"))
+        self.ghost_new_color_btn = ColorButton(
+            self.config.get("ghost_new_color", "#0066FF")
+        )
         form.addRow("New Color:", self.ghost_new_color_btn)
 
-        self.ghost_learn_color_btn = ColorButton(self.config.get("ghost_learn_color", "#FF0000"))
+        self.ghost_learn_color_btn = ColorButton(
+            self.config.get("ghost_learn_color", "#FF0000")
+        )
         form.addRow("Learn Color:", self.ghost_learn_color_btn)
 
-        self.ghost_review_color_btn = ColorButton(self.config.get("ghost_review_color", "#009900"))
+        self.ghost_review_color_btn = ColorButton(
+            self.config.get("ghost_review_color", "#009900")
+        )
         form.addRow("Review Color:", self.ghost_review_color_btn)
-        
+
         # Max Time
         self.max_time_spin = QSpinBox()
         self.max_time_spin.setRange(1, 3600)
@@ -131,14 +149,16 @@ class ConfigDialog(QDialog):
         # Advanced Section
         adv_group = QGroupBox("Advanced")
         adv_layout = QFormLayout()
-        
+
         self.alpha_spin = QDoubleSpinBox()
         self.alpha_spin.setRange(0.01, 1.0)
         self.alpha_spin.setSingleStep(0.05)
         self.alpha_spin.setValue(self.config.get("smoothing_alpha", 0.2))
-        self.alpha_spin.setToolTip("Determines how quickly the estimated time adapts to your recent performance.\n"
-                                   "Higher values (closer to 1.0) prioritize recent cards,\n"
-                                   "while lower values (closer to 0.0) favor long-term historical averages.")
+        self.alpha_spin.setToolTip(
+            "Determines how quickly the estimated time adapts to your recent performance.\n"
+            "Higher values (closer to 1.0) prioritize recent cards,\n"
+            "while lower values (closer to 0.0) favor long-term historical averages."
+        )
         adv_layout.addRow("Smoothing Alpha:", self.alpha_spin)
         adv_group.setLayout(adv_layout)
         layout.addWidget(adv_group)
@@ -167,10 +187,11 @@ class ConfigDialog(QDialog):
         self.config["ghost_new_color"] = self.ghost_new_color_btn.color()
         self.config["ghost_learn_color"] = self.ghost_learn_color_btn.color()
         self.config["ghost_review_color"] = self.ghost_review_color_btn.color()
-        
+
         ConfigManager.save(self.config)
         super().accept()
         showInfo("Configuration saved.")
+
 
 def show_config():
     dialog = ConfigDialog(mw)
@@ -180,9 +201,11 @@ def show_config():
 # Global action reference
 config_action = None
 
+
 def on_state_did_change(next_state, previous_state):
     if config_action:
         config_action.setVisible(next_state == "review")
+
 
 def setup_menu():
     global config_action
@@ -191,6 +214,7 @@ def setup_menu():
     mw.form.menuTools.addAction(config_action)
     # Initial state
     config_action.setVisible(mw.state == "review")
+
 
 # Setup on load
 setup_menu()
