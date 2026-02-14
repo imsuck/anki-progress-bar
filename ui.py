@@ -71,7 +71,7 @@ class ProgressWidget:
                 text-align: center !important;
                 pointer-events: none !important;
                 font-weight: bold !important;
-                text-shadow: 0 0 2px {config.get("bg_color", "#f0f0f0")} !important;
+                text-shadow: 0 0 2px {config.get("text_shadow_color", "#f7f7f7")} !important;
             }}
         </style>
         """

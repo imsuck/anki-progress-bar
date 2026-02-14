@@ -1,51 +1,21 @@
 from aqt import mw, gui_hooks
 from aqt.qt import *
 from aqt.utils import showInfo
-import json
-import os
 
 
 # Global Config Manager
 class ConfigManager:
-    _config = None
-    _config_file = os.path.join(os.path.dirname(__file__), "config.json")
-
-    @classmethod
-    def load(cls):
-        if cls._config is None:
-            try:
-                with open(cls._config_file, "r") as f:
-                    cls._config = json.load(f)
-            except:
-                cls._config = {
-                    "position": "top",
-                    "color_mode": "dynamic",
-                    "history_window": 20,
-                    "text_color": "#333333",
-                    "correct_color": "#4CAF50",
-                    "incorrect_color": "#F44336",
-                    "bg_color": "#f0f0f0",
-                    "max_time_per_card": 60,
-                    "smoothing_alpha": 0.2,
-                    "ghost_new_color": "#0066FF",
-                    "ghost_learn_color": "#FF0000",
-                    "ghost_review_color": "#009900",
-                }
-        return cls._config
+    _callback = None
 
     @classmethod
     def get(cls):
-        if cls._config is None:
-            cls.load()
-        return cls._config
+        return mw.addonManager.getConfig(__name__) or {}
 
     @classmethod
     def save(cls, new_config):
-        cls._config = new_config
-        with open(cls._config_file, "w") as f:
-            json.dump(cls._config, f)
+        mw.addonManager.writeConfig(__name__, new_config)
         # Notify listeners
-        if hasattr(cls, "_callback") and cls._callback:
+        if cls._callback:
             cls._callback()
 
     @classmethod
@@ -53,8 +23,9 @@ class ConfigManager:
         cls._callback = callback
 
 
-# Initialize on module load
-ConfigManager.load()
+def on_addon_config_did_change(new_config):
+    if ConfigManager._callback:
+        ConfigManager._callback()
 
 
 class ColorButton(QPushButton):
@@ -109,8 +80,10 @@ class ConfigDialog(QDialog):
         self.text_color_btn = ColorButton(self.config.get("text_color", "#333333"))
         form.addRow("Text Color:", self.text_color_btn)
 
-        self.bg_color_btn = ColorButton(self.config.get("bg_color", "#f0f0f0"))
-        form.addRow("Background Color:", self.bg_color_btn)
+        self.text_shadow_color_btn = ColorButton(
+            self.config.get("text_shadow_color", "#f7f7f7")
+        )
+        form.addRow("Text Shadow:", self.text_shadow_color_btn)
 
         self.correct_color_btn = ColorButton(
             self.config.get("correct_color", "#4CAF50")
@@ -179,7 +152,7 @@ class ConfigDialog(QDialog):
         self.config["position"] = self.pos_combo.currentText()
         self.config["color_mode"] = self.color_combo.currentText()
         self.config["text_color"] = self.text_color_btn.color()
-        self.config["bg_color"] = self.bg_color_btn.color()
+        self.config["text_shadow_color"] = self.text_shadow_color_btn.color()
         self.config["correct_color"] = self.correct_color_btn.color()
         self.config["incorrect_color"] = self.incorrect_color_btn.color()
         self.config["max_time_per_card"] = self.max_time_spin.value()
@@ -212,6 +185,9 @@ def setup_menu():
     config_action = QAction("Anki Progress Bar Options", mw)
     config_action.triggered.connect(show_config)
     mw.form.menuTools.addAction(config_action)
+    # Register with Anki's Add-on Manager
+    mw.addonManager.setConfigAction(__name__, show_config)
+    mw.addonManager.setConfigUpdatedAction(__name__, on_addon_config_did_change)
     # Initial state
     config_action.setVisible(mw.state == "review")
 

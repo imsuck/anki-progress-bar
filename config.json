@@ -1,0 +1,14 @@
+{
+    "position": "top",
+    "color_mode": "dynamic",
+    "history_window": 20,
+    "text_color": "#333333",
+    "correct_color": "#4CAF50",
+    "incorrect_color": "#F44336",
+    "max_time_per_card": 60,
+    "smoothing_alpha": 0.2,
+    "ghost_new_color": "#0066FF",
+    "ghost_learn_color": "#FF0000",
+    "ghost_review_color": "#009900",
+    "text_shadow_color": "#f7f7f7"
+}
