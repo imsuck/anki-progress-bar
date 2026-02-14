@@ -16,3 +16,6 @@ Basically this [add-on](https://ankiweb.net/shared/info/1508357010), in short:
 - Breakdown of estimate for different types of pending cards.
 - Configure options by first entering a study session. Then goto
   `Tools > Anki Progress Bar options` and adjust them to your liking.
+
+## TODOs
+- Make it work on AnkiDroid (with script injection into decks and cookies for storage)
