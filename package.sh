@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-zip -r anki-prog-bar.ankiaddon src/*
+zip -r anki-prog-bar.ankiaddon $(fd . src)
