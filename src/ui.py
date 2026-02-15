@@ -114,14 +114,11 @@ class ProgressWidget:
                 opacity = 1.0
             else:
                 ratio = item["time"] / target_avg
-                if ratio <= 0.5:
-                    opacity = 1.0
-                elif ratio >= 1.5:
-                    opacity = 0.3
-                else:
-                    opacity = 1.0 + (-0.7 * (ratio - 0.5))
-
-                opacity = max(0.3, min(1.0, opacity))
+                # [0.5, 1.5] => [0, 1]
+                t = ratio - 0.5
+                t = max(0.0, min(1.0, t))
+                # [0, 1] -> [1.0, 0.5]
+                opacity = 1.0 + (0.5 - 1.0) * t
 
             cls = item["result"]
             flex = item["time"]
