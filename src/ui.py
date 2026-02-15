@@ -72,6 +72,29 @@ class ProgressWidget:
                 pointer-events: none !important;
                 font-weight: bold !important;
                 text-shadow: 0 0 2px {config.get("text_shadow_color", "#f7f7f7")} !important;
+                padding: 0 50px !important;
+                box-sizing: border-box !important;
+            }}
+            .clear-btn {{
+                position: absolute !important;
+                right: 0 !important;
+                top: 0 !important;
+                height: 100% !important;
+                padding: 0 8px !important;
+                margin: 0 !important;
+                background: rgba(0,0,0,0.05) !important;
+                border: none !important;
+                border-left: 1px solid rgba(0,0,0,0.1) !important;
+                border-radius: 0 !important;
+                cursor: pointer !important;
+                font-size: 10px !important;
+                line-height: 20px !important;
+                color: {config.get("text_color", "#333")} !important;
+                z-index: 10000 !important;
+                pointer-events: auto !important;
+            }}
+            .clear-btn:hover {{
+                background: rgba(0,0,0,0.2) !important;
             }}
         </style>
         """
@@ -127,6 +150,7 @@ class ProgressWidget:
         <div id='anki-timer-bar'>
             {blocks_html}
             <div class='overlay-text'>{initial_labels}</div>
+            <button class='clear-btn' onclick='pycmd("anki_timer_clear_session")' title='Clear session for this deck'>Clear</button>
         </div>
         """
         return html
@@ -162,4 +186,13 @@ class ProgressWidget:
                 window.ankiTimerInterval = setInterval(update, 1000);
                 // No immediate update here to avoid jitter if initial render was close
             }})();
+        """
+
+    @staticmethod
+    def get_stop_timer_js():
+        return """
+            if (window.ankiTimerInterval) {
+                clearInterval(window.ankiTimerInterval);
+                window.ankiTimerInterval = null;
+            }
         """
